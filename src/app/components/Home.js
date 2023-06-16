@@ -6,7 +6,7 @@ const Home = () => {
             .then(response => response.json())
             .then((data)=> {
                 const fileName = 'ejemplo'
-                const exportType = exportFromJson.types.csv
+                const exportType = exportFromJson.types.xls
                 exportFromJson({data, fileName, exportType})
             })
             .catch((err)=>{
