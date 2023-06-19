@@ -43,6 +43,8 @@ async function engineString(data, response) {
         formBody.push(encodeURIComponent('data') + "=" + encodeURIComponent(dataLimpia));
         formBody.push(encodeURIComponent('ignore') + "=" + encodeURIComponent(BaseURL));
         formBody = formBody.join("&");
+
+        // Hacemos la query a la api de plagio enviando la data (cadena limpia)
         /* const respuestaApiPlagio = await fetch('https://www.prepostseo.com/apis/checkPlag', {
             method: 'POST',
             headers: {
