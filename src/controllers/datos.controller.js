@@ -1,9 +1,9 @@
 const fetch = require("node-fetch");
 
 const datosController = (req, res) => {
-    let fechaInicio = "2022-01-01T00:00:00Z"
-    let fechaFin = "2022-12-31T23:59:59Z"
-    const url = `https://api.eluniverso.arcpublishing.com/content/v4/search/?website=el-universo&size=20&from=0&body={"query":{"bool":{"must":[{"term":{"type":"story"}},{"range":{"publish_date":{"gte":"${fechaInicio}","lte":"${fechaFin}"}}},{"match_phrase_prefix":{"credits.by.name":"Periodista Cinco"}},{"term":{"revision.published":"false"}}]}}}`
+    let fechaInicio = "2022-03-06T00:00:03.872Z"
+    let fechaFin = "2022-03-07T16:30:00Z"
+    const url = `https://api.eluniverso.arcpublishing.com/content/v4/search/?website=el-universo&size=20&from=0&body={"query":{"bool":{"must":[{"term":{"type":"story"}},{"range":{"publish_date":{"gte":"${fechaInicio}","lte":"${fechaFin}"}}},{"match_phrase_prefix":{"credits.by.name":"Periodista Cinco"}},{"term":{"revision.published":"true"}}]}}}`
     console.log(url)
     fetch(url, {
             method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -15,7 +15,7 @@ const datosController = (req, res) => {
         .then(res => res.json())
         .then(data => {
             engineString(data , (final) => {
-                console.log(final)
+                //console.log(final)
                 res.json(final)
             })
         })
@@ -24,9 +24,10 @@ const datosController = (req, res) => {
 
 async function engineString(data, response) {
     const BaseURL = "https://www.eluniverso.com/"
+    console.log(data.count)
     const datosFinales = []
-    // for (let i = 0; i < data.content_elements.length; i++) {   <- Descomentar esta linea para que tome todos los datos de arc
-    for (let i = 0; i < 1 ; i++) { //esta seteado en 1 para cuestion de pruebas (solo devuelve 1 registro de lo que encuentre arc)
+    for (let i = 0; i < data.content_elements.length; i++) {   //<- Descomentar esta linea para que tome todos los datos de arc
+    //for (let i = 0; i < 10 ; i++) { //esta seteado en 1 para cuestion de pruebas (solo devuelve 1 registro de lo que encuentre arc)
         let cadena = ""
         for (let a = 0; a < data.content_elements[i].content_elements.length; a++) {
             let dataSucia = data.content_elements[i].content_elements[a].content
@@ -39,24 +40,23 @@ async function engineString(data, response) {
         const dataLimpia = cadena.replace(/(<([^>]+)>)/gi, "");
 
         var formBody = [];
-        formBody.push(encodeURIComponent('key') + "=" + encodeURIComponent("989aa42c8382844b061eab3388d7cd8b"));
+        formBody.push(encodeURIComponent('key') + "=" + encodeURIComponent("376c7b4f0d516a3861e4b6de009ead9c"));
         formBody.push(encodeURIComponent('data') + "=" + encodeURIComponent(dataLimpia));
         formBody.push(encodeURIComponent('ignore') + "=" + encodeURIComponent(BaseURL));
         formBody = formBody.join("&");
 
         // Hacemos la query a la api de plagio enviando la data (cadena limpia)
-        /* const respuestaApiPlagio = await fetch('https://www.prepostseo.com/apis/checkPlag', {
+        
+        const respuestaApiPlagio = await fetch('https://www.prepostseo.com/apis/checkPlag', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
             },
             body: formBody
         })
-        //const dataPlagio = await respuestaApiPlagio.json()
-        //console.log(dataPlagio)*/
-
-        // Separamos en arrays los links y porcentajes de plagio
-        const static_object = {
+        const dataPlagio = await respuestaApiPlagio.json()
+      
+        /*const static_object = {
             isQueriesFinished: 'false',
             sources: [
               {
@@ -203,7 +203,9 @@ async function engineString(data, response) {
                 paraphrase: 'false'
               }
             ]
-        }
+        }*/
+
+        // Separamos en arrays los links y porcentajes de plagio
 
         /*const links_plagio = static_object.sources.reduce( (acumulator, current) => {
             return acumulator.concat(current.link)
@@ -211,16 +213,23 @@ async function engineString(data, response) {
         const porcentajes_plagio = static_object.sources.reduce( (acumulator, current) => {
             return acumulator.concat(current.percent)
         }, []) */
-
-        const obj = {
-            "Fecha Publicacion": data.content_elements[i].publish_date,
-            "Titulo": data.content_elements[i].headlines?.meta_title,
-            "Url Post": BaseURL + data.content_elements[i].canonical_url,
-            "Autor": "Periodista Cinco",
-            "Url Plagio": static_object.sources[1]?.link,
-            "porcentaje": static_object.sources[1]?.percent  + "%",
+        try{
+          console.log(dataPlagio.totalQueries)
+          const obj = {
+              "Fecha Publicacion": data.content_elements[i].publish_date,
+              "Titulo": data.content_elements[i].headlines?.meta_title,
+              "Url Post": BaseURL + data.content_elements[i].canonical_url,
+              "Autor": "Periodista Cinco",
+              "Url Plagio": dataPlagio.sources[0]?.link,
+              "porcentaje": dataPlagio.sources[0]?.percent  + "%",
+          }
+          datosFinales.push(obj)
         }
-        datosFinales.push(obj)
+        catch(err){
+          console.log("Se acabaron los creditos uwu")
+          break;
+        }
+        
     }
     response(datosFinales)
 }
