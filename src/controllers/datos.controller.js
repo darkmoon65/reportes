@@ -4,7 +4,7 @@ const datosController = (req, res) => {
     const { fechaInicio , fechaFin, autor} = req.body;
     //let fechaInicio = "2022-02-01T00:00:00.872Z"
     //let fechaFin = "2022-02-16T23:02:41Z"
-    const url = `https://api.eluniverso.arcpublishing.com/content/v4/search/?website=el-universo&size=20&from=0&body={"query":{"bool":{"must":[{"term":{"type":"story"}},{"range":{"publish_date":{"gte":"${fechaInicio}","lte":"${fechaFin}"}}},{"match_phrase_prefix":{"credits.by.name":"${autor}"}},{"term":{"revision.published":"true"}}]}}}`
+    const url = `https://api.eluniverso.arcpublishing.com/content/v4/search/?website=el-universo&size=100&from=0&body={"query":{"bool":{"must":[{"term":{"type":"story"}},{"range":{"publish_date":{"gte":"${fechaInicio}","lte":"${fechaFin}"}}},{"match_phrase_prefix":{"credits.by.name":"${autor}"}},{"term":{"revision.published":"true"}}]}}}`
     console.log(url)
     fetch(url, {
             method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -32,7 +32,7 @@ const datosController = (req, res) => {
 
 async function engineString(data, response) {
     const BaseURL = "https://www.eluniverso.com/"
-    console.log(data.count)
+    console.log("Total de registros: "+ data.count)
     const datosFinales = []
     for (let i = 0; i < data.content_elements.length; i++) {   //<- Descomentar esta linea para que tome todos los datos de arc
     //for (let i = 0; i < 1 ; i++) { //esta seteado en 1 para cuestion de pruebas (solo devuelve 1 registro de lo que encuentre arc)
