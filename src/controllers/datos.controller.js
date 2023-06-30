@@ -19,7 +19,7 @@ const datosController = (req, res) => {
                 res.json({"estado": 'false', "datos": null })
             }
             else {
-                engineString(data , (final) => {
+                engineString(data, autor , (final) => {
                     //console.log(final)
                     res.json({"estado": 'true', "datos": final})
                 })
@@ -30,7 +30,7 @@ const datosController = (req, res) => {
         })
 }
 
-async function engineString(data, response) {
+async function engineString(data,autor, response) {
     const BaseURL = "https://www.eluniverso.com/"
     console.log("Total de registros: "+ data.count)
     const datosFinales = []
@@ -55,15 +55,24 @@ async function engineString(data, response) {
 
         // Hacemos la query a la api de plagio enviando la data (cadena limpia)
         
-        const respuestaApiPlagio = await fetch('https://www.prepostseo.com/apis/checkPlag', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-            },
-            body: formBody
-        })
-        const dataPlagio = await respuestaApiPlagio.json()
-      
+        console.log(data.content_elements[i]?.publish_date)
+
+
+        var dataPlagio = {}
+        try{
+            const respuestaApiPlagio = await fetch('https://www.prepostseo.com/apis/checkPlag', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                },
+                body: formBody
+            })
+            dataPlagio = await respuestaApiPlagio.json()
+        }catch(err){
+            console.log(err)
+            continue;
+        }
+
         // Separamos en arrays los links y porcentajes de plagio
 
         /*const links_plagio = static_object.sources.reduce( (acumulator, current) => {
@@ -79,7 +88,7 @@ async function engineString(data, response) {
               "Fecha Publicacion": data.content_elements[i]?.publish_date,
               "Titulo": data.content_elements[i].headlines?.meta_title,
               "Url Post": BaseURL + data.content_elements[i].canonical_url,
-              "Autor": "Periodista Cinco",
+              "Autor": autor,
               "Url Plagio": dataPlagio.sources[0]?.link,
               "porcentaje": dataPlagio.sources[0]?.percent  + "%",
           }
@@ -87,7 +96,6 @@ async function engineString(data, response) {
         }
         catch(err){
           console.log("Se acabaron los creditos")
-          break;
         }
         
     }
