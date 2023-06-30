@@ -3,6 +3,7 @@ const server = express()
 
 server.set('PORT', 3000 || process.env)
 
+server.use(express.json());
 //rutas
 server.use('/api/', require('./routes/api.routes'))
 
